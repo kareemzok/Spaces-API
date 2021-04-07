@@ -157,20 +157,53 @@ class Space {
   }
 
 
+    /*
+      Uploads a file.
+     */
 
-  /*
-  Uploads a file.
-  */
-  function uploadFile($filePath, $saveAs = "", $privacy = "private") {
-    if(empty($saveAs)) { $saveAs = $filePath; }
-    if($privacy == "public") { $privacy = "public-read"; }
+    function uploadFile($filePath, $saveAs = "", $privacy = "private", $mime) {
+        if (empty($saveAs)) {
+            $saveAs = $filePath;
+        }
+        if ($privacy == "public") {
+            $privacy = "public-read";
+        }
 
-    $content = fopen($filePath, "r");
-    $result = $this->s3->upload($this->name, $saveAs, $content, $privacy);
+        $content = fopen($filePath, "r");
 
-    fclose($content);
-    return SpacesResult($result);
-  }
+        $result = $this->s3->upload($this->name, $saveAs, $content, $privacy,
+                array('params' =>
+                    array('ContentType' => $mime
+                    )
+        ));
+
+        fclose($content);
+        return SpacesResult($result);
+    }
+
+    /**
+     * 
+     * @param type $filePath
+     * @param type $saveAs
+     * @param string $privacy
+     * @param type $mime
+     */
+    function upload64BaseImage($filePath, $saveAs = "", $privacy = "private", $mime) {
+        if (empty($saveAs)) {
+            $saveAs = $filePath;
+        }
+        if ($privacy == "public") {
+            $privacy = "public-read";
+        }
+
+        $this->s3->putObject(array(
+            'Bucket' => $this->name,
+            'Key' => $saveAs,
+            'Body' => $filePath,
+            'ACL' => $privacy,
+            'ContentType' => $mime
+        ));
+    }
 
 
 
